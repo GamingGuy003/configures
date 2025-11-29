@@ -1,24 +1,21 @@
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-type Error = crate::error::Error;
+type Error = crate::Error;
 
-/// holds information about a profile
+/// holds which files are tracked by profile
 #[derive(Deserialize, Serialize)]
 pub struct Profile {
-    /// the displayname of the profile
-    name: String,
     /// the files tracked by the profile
     files: Vec<ConfigFile>,
-    /// should this be copied
+    /// should profile be copied or symlinked
     copy: bool,
 }
 
 impl Profile {
     /// creates a new profile with the specified config files
-    pub fn new(name: &str, files: &Vec<ConfigFile>, copy: bool) -> Self {
+    pub fn new(files: &Vec<ConfigFile>, copy: bool) -> Self {
         Self {
-            name: name.to_owned(),
             files: files.to_owned(),
             copy,
         }
@@ -73,20 +70,20 @@ impl ConfigFile {
             self.system_path.display(),
         );
         if std::fs::exists(&self.system_path)
-            .map_err(|err| Error::LinkError(self.profile_path.clone(), err))?
+            .map_err(|err| Error::Link(self.profile_path.clone(), err))?
         {
             todo!("File conflicts not yet implemented");
         }
 
         std::os::unix::fs::symlink(&self.profile_path, &self.system_path)
-            .map_err(|err| Error::LinkError(self.profile_path.clone(), err))
+            .map_err(|err| Error::Link(self.profile_path.clone(), err))
     }
 
     /// this name is inaccurate. moves a file to its system location. used for restoring backup
     /// profiles
     pub fn copy(&self) -> Result<(), Error> {
         if !std::fs::exists(&self.system_path)
-            .map_err(|err| Error::CopyError(self.system_path.clone(), err))?
+            .map_err(|err| Error::Copy(self.system_path.clone(), err))?
         {
             println!(
                 "{} -> {}",
@@ -94,7 +91,7 @@ impl ConfigFile {
                 self.system_path.display(),
             );
             std::fs::rename(&self.profile_path, &self.system_path)
-                .map_err(|err| Error::CopyError(self.system_path.clone(), err))?
+                .map_err(|err| Error::Copy(self.system_path.clone(), err))?
         } else {
             println!(
                 "Skipping {} -X-> {}",
@@ -109,11 +106,11 @@ impl ConfigFile {
     pub fn unlink(&self) -> Result<(), Error> {
         // check if file to remove is symlink
         if std::fs::symlink_metadata(&self.system_path)
-            .map_err(|err| Error::UnlinkError(self.system_path.clone(), err))?
+            .map_err(|err| Error::Unlink(self.system_path.clone(), err))?
             .is_symlink()
             // check if symlink points to our source file
             && std::fs::read_link(&self.system_path)
-                .map_err(|err| Error::UnlinkError(self.profile_path.clone(), err))?
+                .map_err(|err| Error::Unlink(self.profile_path.clone(), err))?
                 .eq(&self.profile_path)
         {
             println!(
@@ -122,7 +119,7 @@ impl ConfigFile {
                 &self.system_path.display()
             );
             std::fs::remove_file(&self.system_path)
-                .map_err(|err| Error::UnlinkError(self.profile_path.clone(), err))?
+                .map_err(|err| Error::Unlink(self.profile_path.clone(), err))?
         } else {
             println!(
                 "Skipping {} -> {}",
