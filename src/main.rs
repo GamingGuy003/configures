@@ -1,10 +1,12 @@
 use std::path::PathBuf;
 
 use crate::{
+    cli::CLI,
     metadata::MetaData,
     profile::{ConfigFile, Profile},
 };
 
+mod cli;
 mod error;
 mod metadata;
 mod profile;
@@ -16,6 +18,8 @@ type Error = crate::error::Error;
 static REPLACE: bool = false;
 
 fn main() -> Result<(), Error> {
+    // parse arguments
+    let mut arguments = CLI::new(std::env::args())?;
     // profiles config folder
     let test_source = PathBuf::from("/home")
         .join(whoami::username())

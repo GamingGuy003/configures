@@ -2,6 +2,12 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum Error {
+    #[error("Argument {0} is missing its value")]
+    CLIMissingValue(String),
+    #[error("Unrecognized argument{0}")]
+    CLIInvalidValue(String),
+    #[error("Value {0} could not be parsed")]
+    CLIValueParse(std::num::ParseIntError),
     #[error("Failed to load profile files: {0}")]
     ProfileLoad(std::io::Error),
     #[error("Failed to read metadata {0}: {1}")]
