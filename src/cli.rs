@@ -2,6 +2,7 @@ use std::path::PathBuf;
 
 type Error = crate::Error;
 
+#[derive(Clone)]
 pub enum Arguments {
     /// lists all profiles
     ListProfiles,
@@ -56,5 +57,14 @@ impl CLI {
         }
 
         Ok(Self { arguments })
+    }
+
+    /// fetches an argument from the cli list. ignores values passed inside the enum
+    pub fn get(&self, argument: Arguments) -> Option<Arguments> {
+        self.arguments
+            .iter()
+            // for some reason _element seems to be unused
+            .find(|_element| matches!(&argument, _element))
+            .cloned()
     }
 }

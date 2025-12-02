@@ -19,7 +19,9 @@ static REPLACE: bool = false;
 
 fn main() -> Result<(), Error> {
     // parse arguments
-    let mut arguments = CLI::new(std::env::args())?;
+    let arguments = CLI::new(std::env::args())?;
+
+    dbg!(arguments.get(cli::Arguments::Profile(0)).is_some());
     // profiles config folder
     let test_source = PathBuf::from("/home")
         .join(whoami::username())
