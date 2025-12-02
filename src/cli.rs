@@ -32,22 +32,22 @@ impl CLI {
         // iterate through all passed arguments and parse them into the enums
         while let Some(arg) = value.next() {
             // remove leading -
-            match arg.trim_start_matches("-") {
-                "l" | "-list" => arguments.push(Arguments::ListProfiles),
-                "p" | "-profile" => arguments.push(Arguments::Profile(
+            match arg.as_str() {
+                "list" => arguments.push(Arguments::ListProfiles),
+                "profile" => arguments.push(Arguments::Profile(
                     value
                         .next()
                         .ok_or(Error::CLIMissingValue(arg))?
                         .parse()
                         .map_err(|err| Error::CLIValueParse(err))?,
                 )),
-                "ap" | "-add-profile" => arguments.push(Arguments::AddProfile(
+                "add-profile" => arguments.push(Arguments::AddProfile(
                     value.next().ok_or(Error::CLIMissingValue(arg))?,
                 )),
-                "a" | "-add" => arguments.push(Arguments::AddPath(PathBuf::from(
+                "add" => arguments.push(Arguments::AddPath(PathBuf::from(
                     value.next().ok_or(Error::CLIMissingValue(arg))?,
                 ))),
-                "rm" | "-remove" => arguments.push(Arguments::RemovePath(PathBuf::from(
+                "remove" => arguments.push(Arguments::RemovePath(PathBuf::from(
                     value.next().ok_or(Error::CLIMissingValue(arg))?,
                 ))),
                 // does not exist
