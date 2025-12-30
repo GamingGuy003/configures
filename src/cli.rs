@@ -8,8 +8,8 @@ pub enum Arguments {
     ListProfiles,
     /// adds a profile
     AddProfile(String),
-    /// selects a specific profile
-    Profile(u16),
+    /// selects a specific profile via md5
+    Profile(String),
     /// adds a path to a profile recursively
     AddPath(std::path::PathBuf),
     /// removes a path from a profile recursively
@@ -36,11 +36,7 @@ impl CLI {
             match arg.as_str() {
                 "list" => arguments.push(Arguments::ListProfiles),
                 "profile" => arguments.push(Arguments::Profile(
-                    value
-                        .next()
-                        .ok_or(Error::CLIMissingValue(arg))?
-                        .parse()
-                        .map_err(|err| Error::CLIValueParse(err))?,
+                    value.next().ok_or(Error::CLIMissingValue(arg))?,
                 )),
                 "add-profile" => arguments.push(Arguments::AddProfile(
                     value.next().ok_or(Error::CLIMissingValue(arg))?,

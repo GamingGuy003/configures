@@ -21,7 +21,18 @@ fn main() -> Result<(), Error> {
     // parse arguments
     let arguments = CLI::new(std::env::args())?;
 
-    dbg!(arguments.get(cli::Arguments::Profile(0)).is_some());
+    // fetch profile
+    if let Some(cli::Arguments::Profile(profile_index)) =
+        arguments.get(cli::Arguments::Profile(String::new()))
+    {
+        let profile = PathBuf::from("/home")
+            .join(whoami::username())
+            .join(".configures/profiles")
+            .join(profile_index);
+        println!("{profile:?}");
+        return Ok(());
+    }
+
     // profiles config folder
     let test_source = PathBuf::from("/home")
         .join(whoami::username())
