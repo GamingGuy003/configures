@@ -6,9 +6,11 @@ type Error = crate::Error;
 pub enum Arguments {
     /// lists all profiles
     ListProfiles,
-    /// adds a profile
+    /// adds a profile via name
     AddProfile(String),
-    /// selects a specific profile via md5
+    /// removes a profile via identifier
+    RemoveProfile(String),
+    /// selects a specific profile via identitifer
     Profile(String),
     /// adds a path to a profile recursively
     AddPath(std::path::PathBuf),
@@ -19,6 +21,16 @@ pub enum Arguments {
 /// holds the parsed cli arguments
 pub struct CLI {
     pub arguments: Vec<Arguments>,
+}
+
+impl IntoIterator for CLI {
+    type Item = Arguments;
+
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.arguments.into_iter()
+    }
 }
 
 impl CLI {
@@ -39,6 +51,9 @@ impl CLI {
                     value.next().ok_or(Error::CLIMissingValue(arg))?,
                 )),
                 "add-profile" => arguments.push(Arguments::AddProfile(
+                    value.next().ok_or(Error::CLIMissingValue(arg))?,
+                )),
+                "remove-profile" => arguments.push(Arguments::RemoveProfile(
                     value.next().ok_or(Error::CLIMissingValue(arg))?,
                 )),
                 "add" => arguments.push(Arguments::AddPath(PathBuf::from(

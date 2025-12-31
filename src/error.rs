@@ -28,4 +28,8 @@ pub enum Error {
     Copy(std::path::PathBuf, std::io::Error),
     #[error("Failed to calculate timestamp: {0}")]
     SystemTime(std::time::SystemTimeError),
+    #[error("Working directory could not be determined")]
+    InvalidWorkingDir,
+    #[error("Could not create working directory {0}: {1}")]
+    WorkingDirCreation(std::path::PathBuf, std::io::Error),
 }
