@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 type Error = crate::Error;
 
 /// associates profile name and a unique hash identifier
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MetaData {
     /// md5 hash made out of name + salt
     pub id: String,
@@ -31,6 +31,16 @@ impl MetaData {
             name,
             files: Vec::new(),
         })
+    }
+
+    /// attempts to add a file definition to the profile
+    pub fn add_file(&mut self, system_path: PathBuf) -> Result<(), Error> {
+        let profile_path = system_path
+            .strip_prefix(PathBuf::from("/home").join(whoami::username()))
+            .map_err(Error::StripFail)?;
+        let config = ConfigFile::new(profile_path.to_path_buf(), system_path);
+        self.files.push(config);
+        Ok(())
     }
 
     /// applies a profile to the system

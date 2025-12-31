@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 type Error = crate::Error;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Arguments {
     /// lists all profiles
     ListProfiles,
@@ -71,11 +71,14 @@ impl CLI {
     }
 
     /// fetches an argument from the cli list. ignores values passed inside the enum
-    pub fn get(&self, argument: Arguments) -> Option<Arguments> {
+    pub fn get<F>(&self, mut search: F) -> Option<Arguments>
+    where
+        F: FnMut(&&Arguments) -> bool,
+    {
         self.arguments
             .iter()
             // for some reason _element seems to be unused
-            .find(|_element| matches!(&argument, _element))
+            .find(|element| search(element))
             .cloned()
     }
 }

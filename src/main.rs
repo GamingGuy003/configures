@@ -1,6 +1,9 @@
 use std::{path::PathBuf, sync::OnceLock};
 
-use crate::{cli::CLI, metadata::MetaData};
+use crate::{
+    cli::{Arguments, CLI},
+    metadata::MetaData,
+};
 
 mod cli;
 mod error;
@@ -22,7 +25,7 @@ fn main() -> Result<(), Error> {
 
     // fetch profile
     if let Some(cli::Arguments::Profile(profile_index)) =
-        arguments.get(cli::Arguments::Profile(String::new()))
+        arguments.get(|arg| matches!(arg, Arguments::Profile(_)))
     {
         PROFILE.get_or_init(|| profile_index);
     }
@@ -59,6 +62,15 @@ fn load_metadata() -> Result<Vec<MetaData>, Error> {
     .map_err(Error::ConfigParse)
 }
 
+fn save_metadata(metadata: impl serde::Serialize) -> Result<(), Error> {
+    let path = get_working_dir()?.join(PROFILES_FILE);
+    std::fs::write(
+        &path,
+        &serde_json::to_string_pretty(&metadata).map_err(Error::ConfigSerialize)?,
+    )
+    .map_err(|err| Error::ConfigWrite(path, err))
+}
+
 /// lists all currently available profiles
 fn list_profiles() -> Result<(), Error> {
     let metadata = load_metadata()?;
@@ -75,33 +87,42 @@ fn list_profiles() -> Result<(), Error> {
 
 /// adds new profile
 fn add_profile(name: String) -> Result<(), Error> {
-    let path = get_working_dir()?.join(PROFILES_FILE);
     let mut old_metadata = load_metadata()?;
     let metadata = MetaData::new(name)?;
-    old_metadata.push(metadata);
-    let new_metadata =
-        serde_json::to_string_pretty(&old_metadata).map_err(Error::ConfigSerialize)?;
-    std::fs::write(&path, new_metadata).map_err(|err| Error::ConfigWrite(path.to_path_buf(), err))
+    old_metadata.push(metadata.clone());
+    save_metadata(old_metadata)?;
+    println!("Added profile {} with id {}", metadata.name, metadata.id);
+    Ok(())
 }
 
 /// removes a profile via identifier
 fn remove_profile(identifier: String) -> Result<(), Error> {
-    let path = get_working_dir()?.join(PROFILES_FILE);
     let old_metadata = load_metadata()?;
-    let new_metadata = old_metadata
-        .iter()
-        .filter(|element| element.id != identifier)
-        .collect::<Vec<&MetaData>>();
-    std::fs::write(
-        &path,
-        &serde_json::to_string_pretty(&new_metadata).map_err(Error::ConfigSerialize)?,
+    save_metadata(
+        old_metadata
+            .iter()
+            .filter(|element| element.id != identifier)
+            .collect::<Vec<&MetaData>>(),
     )
-    .map_err(|err| Error::ConfigWrite(path, err))
 }
 
 /// adds file to hopefully specified profile
-fn add_path(path: PathBuf) -> Result<(), Error> {
-    Ok(())
+fn add_path(system_path: PathBuf) -> Result<(), Error> {
+    let identifier = PROFILE.get().ok_or(Error::ProfileNotSpecified)?;
+    let old_metadata = load_metadata()?;
+    let mut profile = old_metadata
+        .iter()
+        .filter(|element| &element.id == identifier)
+        .next()
+        .ok_or(Error::ProfileNotFound)?
+        .clone();
+    profile.add_file(system_path)?;
+    let mut new_metadata = old_metadata
+        .iter()
+        .filter(|element| &element.id != identifier)
+        .collect::<Vec<&MetaData>>();
+    new_metadata.push(&profile);
+    save_metadata(new_metadata)
 }
 
 /// removes file from hopefully specified profile

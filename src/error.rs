@@ -20,6 +20,12 @@ pub enum Error {
     ConfigSerialize(serde_json::Error),
     #[error("Failed to apply profile: {0}")]
     ProfileApply(std::io::Error),
+    #[error("No profile specified")]
+    ProfileNotSpecified,
+    #[error("No such profile exists")]
+    ProfileNotFound,
+    #[error("Failed to strip path prefix to make it relative to ~/.config")]
+    StripFail(std::path::StripPrefixError),
     #[error("Failed to link {0}: {1}")]
     Link(std::path::PathBuf, std::io::Error),
     #[error("Failed to unlink {0}: {1}")]
