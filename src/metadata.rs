@@ -35,9 +35,17 @@ impl MetaData {
 
     /// attempts to add a file definition to the profile
     pub fn add_file(&mut self, system_path: PathBuf) -> Result<(), Error> {
+        // skip if file already exists
+        for file in &self.files {
+            if file.system_path == system_path {
+                return Ok(());
+            }
+        }
+        // if we can remove the home directory do that, otherwise keep system path
         let profile_path = system_path
             .strip_prefix(PathBuf::from("/home").join(whoami::username()))
-            .map_err(Error::StripFail)?;
+            .unwrap_or(system_path.as_path());
+
         let config = ConfigFile::new(profile_path.to_path_buf(), system_path);
         self.files.push(config);
         Ok(())
@@ -152,5 +160,10 @@ impl ConfigFile {
             )
         }
         Ok(())
+    }
+
+    /// compares if a system path is mentioned in a config file
+    pub fn equals(&self, system_path: &PathBuf) -> bool {
+        &self.system_path == system_path
     }
 }

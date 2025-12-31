@@ -2,7 +2,7 @@ use std::{path::PathBuf, sync::OnceLock};
 
 use crate::{
     cli::{Arguments, CLI},
-    metadata::MetaData,
+    metadata::{ConfigFile, MetaData},
 };
 
 mod cli;
@@ -126,8 +126,30 @@ fn add_path(system_path: PathBuf) -> Result<(), Error> {
 }
 
 /// removes file from hopefully specified profile
-fn remove_path(path: PathBuf) -> Result<(), Error> {
-    Ok(())
+fn remove_path(system_path: PathBuf) -> Result<(), Error> {
+    let identifier = PROFILE.get().ok_or(Error::ProfileNotSpecified)?;
+    let old_metadata = load_metadata()?;
+    // fetch profile
+    let mut profile = old_metadata
+        .iter()
+        .filter(|element| &element.id == identifier)
+        .next()
+        .ok_or(Error::ProfileNotFound)?
+        .clone();
+    // remove config file from profile
+    profile.files = profile
+        .files
+        .iter()
+        .filter(|element| !element.equals(&system_path))
+        .cloned()
+        .collect::<Vec<ConfigFile>>();
+    // replace old metadata with new metadata
+    let mut new_metadata = old_metadata
+        .iter()
+        .filter(|element| &element.id != identifier)
+        .collect::<Vec<&MetaData>>();
+    new_metadata.push(&profile);
+    save_metadata(new_metadata)
 }
 
 /// determines the configures working directory and makes sure it exists
