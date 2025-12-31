@@ -16,6 +16,10 @@ pub enum Arguments {
     AddPath(std::path::PathBuf),
     /// removes a path from a profile recursively
     RemovePath(std::path::PathBuf),
+    /// applies a profile
+    Apply,
+    /// disables a profile
+    Strip,
 }
 
 /// holds the parsed cli arguments
@@ -62,6 +66,8 @@ impl CLI {
                 "remove" => arguments.push(Arguments::RemovePath(PathBuf::from(
                     value.next().ok_or(Error::CLIMissingValue(arg))?,
                 ))),
+                "apply" => arguments.push(Arguments::Apply),
+                "strip" => arguments.push(Arguments::Strip),
                 // does not exist
                 _ => continue,
             }

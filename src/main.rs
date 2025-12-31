@@ -38,6 +38,8 @@ fn main() -> Result<(), Error> {
             cli::Arguments::RemoveProfile(identifier) => remove_profile(identifier)?,
             cli::Arguments::AddPath(path_buf) => add_path(path_buf)?,
             cli::Arguments::RemovePath(path_buf) => remove_path(path_buf)?,
+            cli::Arguments::Apply => apply_profile()?,
+            cli::Arguments::Strip => strip_profile()?,
             _ => {}
         }
     }
@@ -166,4 +168,14 @@ fn get_working_dir<'a>() -> Result<&'a PathBuf, Error> {
     }
 
     Ok(path)
+}
+
+/// applies a profile to the system
+fn apply_profile() -> Result<(), Error> {
+    Ok(())
+}
+
+/// removes all changes made by a profile
+fn strip_profile() -> Result<(), Error> {
+    Ok(())
 }

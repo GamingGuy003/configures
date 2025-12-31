@@ -41,11 +41,9 @@ impl MetaData {
                 return Ok(());
             }
         }
-        // if we can remove the home directory do that, otherwise keep system path
         let profile_path = system_path
-            .strip_prefix(PathBuf::from("/home").join(whoami::username()))
-            .unwrap_or(system_path.as_path());
-
+            .strip_prefix(PathBuf::from("/"))
+            .map_err(Error::StripFail)?;
         let config = ConfigFile::new(profile_path.to_path_buf(), system_path);
         self.files.push(config);
         Ok(())
@@ -69,6 +67,7 @@ impl MetaData {
 
     /// removes everything related to a profile
     pub fn strip(&self) -> Result<(), Error> {
+        todo!("Implement rollback");
         for file in &self.files {
             file.unlink()?;
         }
