@@ -70,7 +70,11 @@ impl CLI {
         Ok(Self { arguments })
     }
 
-    /// fetches an argument from the cli list. ignores values passed inside the enum
+    /// fetches an argument from the cli list
+    /// ```
+    /// let args = CLI::new(std::env::args());
+    /// args.get(|arg| matches!(arg, Arguments::Profile(_))).is_some()
+    /// ```
     pub fn get<F>(&self, mut search: F) -> Option<Arguments>
     where
         F: FnMut(&&Arguments) -> bool,
