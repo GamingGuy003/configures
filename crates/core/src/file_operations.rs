@@ -20,9 +20,9 @@ pub fn link(source: &Path, target: &Path) -> Result<(), ConfiguresError> {
 /// attempts to elevate the process in order to link a path
 fn elevate_and_link(source: &Path, target: &Path) -> Result<(), ConfiguresError> {
     // build the tool available on the current platform
-    let tool = EscalationTool::detect().ok_or_else(|| {
-        ConfiguresError::FileManipulationError(FileManipulationError::NoEscalationTool)
-    })?;
+    let tool = EscalationTool::detect().ok_or(ConfiguresError::FileManipulationError(
+        FileManipulationError::NoEscalationTool,
+    ))?;
 
     // try running the command built
     let status = tool
