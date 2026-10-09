@@ -1,0 +1,29 @@
+name: unit_tests
+on: [push, pull_request]
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: Run Workspace Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Cache dependencies and build artifacts
+        uses: Swatinem/rust-cache@v2
+
+      - name: Run Unit Tests on all crates
+        run: cargo test -- workspace --all-targets
+
+      - name: Check formatting
+        run: cargo fmt --check
+
+      - name: Run clippy lints
+        run: cargo clippy --workspace --all-targets -- -D warnings
