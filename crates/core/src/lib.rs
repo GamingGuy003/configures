@@ -22,12 +22,12 @@ mod tests {
         write!(file, "testcontent")?;
 
         file_operations::link(&src_path, &dst_path)
-            .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, format!("{:?}", err)))?;
+            .map_err(|err| std::io::Error::other(format!("{:?}", err)))?;
 
         assert!(dst_path.exists());
         assert_eq!(fs::read_link(&dst_path)?, src_path);
 
-        let content = fs::read_to_string(&dst_path)?;
+        let content = fs::read_to_string(dst_path)?;
         assert_eq!(content.trim(), "testcontent");
 
         Ok(())
@@ -41,7 +41,7 @@ mod tests {
         let dst_path = dir.path().join("destination_config");
 
         file_operations::link(&src_path, &dst_path)
-            .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, format!("{:?}", err)))?;
+            .map_err(|err| std::io::Error::other(format!("{:?}", err)))?;
 
         assert!(fs::symlink_metadata(&dst_path).is_ok());
         assert!(!dst_path.exists());
@@ -57,13 +57,13 @@ mod tests {
 
         File::create(&src_path)?.write_all(b"testcontent")?;
 
-        file_operations::link(&src_path, &dst_path)
-            .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, format!("{:?}", err)))?;
+        file_operations::link(&src_path, dst_path)
+            .map_err(|err| std::io::Error::other(format!("{:?}", err)))?;
 
         assert!(dst_path.exists());
-        assert_eq!(fs::read_link(&dst_path)?, src_path);
+        assert_eq!(fs::read_link(dst_path)?, src_path);
 
-        let content = fs::read_to_string(&dst_path)?;
+        let content = fs::read_to_string(dst_path)?;
         assert_eq!(content.trim(), "testcontent");
 
         Ok(())
