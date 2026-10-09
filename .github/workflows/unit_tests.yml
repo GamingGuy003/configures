@@ -20,7 +20,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Run Unit Tests on all crates
-        run: cargo test -- workspace --all-targets
+        run: cargo test --workspace --all-targets
 
       - name: Check formatting
         run: cargo fmt --check
