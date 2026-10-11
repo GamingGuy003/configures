@@ -3,6 +3,7 @@ pub enum ConfiguresError {
     FileManipulationError(FileManipulationError),
     GitError(GitError),
     StorageError(StorageError),
+    BuilderError(BuilderError),
 }
 
 #[derive(Debug, Clone)]
@@ -18,3 +19,9 @@ pub struct GitError;
 
 #[derive(Debug, Clone)]
 pub struct StorageError;
+
+#[derive(Debug, Clone)]
+pub enum BuilderError {
+    MissingRemote,
+    MissingLocalFolder,
+}

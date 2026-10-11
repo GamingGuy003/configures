@@ -1,7 +1,50 @@
+use crate::error::ConfiguresError;
+
 pub mod error;
 pub mod file_operations;
 pub mod git;
 pub mod storage;
+
+#[derive(Debug)]
+pub struct ConfiguresCore {
+    remote_url: String,
+    local_folder: String,
+}
+
+pub struct ConfiguresCoreBuilder {
+    remote_url: Option<String>,
+    local_folder: Option<String>,
+}
+
+impl ConfiguresCoreBuilder {
+    pub fn new() -> Self {
+        Self {
+            remote_url: None,
+            local_folder: None,
+        }
+    }
+
+    pub fn remote_url(mut self, remote_url: impl Into<String>) -> Self {
+        self.remote_url = Some(remote_url.into());
+        self
+    }
+
+    pub fn local_folder(mut self, local_folder: impl Into<String>) -> Self {
+        self.local_folder = Some(local_folder.into());
+        self
+    }
+
+    pub fn build(self) -> Result<ConfiguresCore, ConfiguresError> {
+        Ok(ConfiguresCore {
+            remote_url: self.remote_url.ok_or(ConfiguresError::BuilderError(
+                error::BuilderError::MissingRemote,
+            ))?,
+            local_folder: self.local_folder.ok_or(ConfiguresError::BuilderError(
+                error::BuilderError::MissingLocalFolder,
+            ))?,
+        })
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -10,6 +53,33 @@ mod tests {
     use std::io::{self, Write};
     use std::path::Path;
     use tempfile::tempdir;
+
+    #[test]
+    fn test_builder_ok() -> Result<(), ConfiguresError> {
+        let configures_core = ConfiguresCoreBuilder::new()
+            .remote_url("remote_url")
+            .local_folder("local_folder")
+            .build()?;
+
+        assert_eq!(configures_core.remote_url, "remote_url");
+        assert_eq!(configures_core.local_folder, "local_folder");
+        Ok(())
+    }
+
+    #[test]
+    fn test_builder_error() -> Result<(), ConfiguresError> {
+        let builder = ConfiguresCoreBuilder::new().remote_url("remote_url");
+        assert!(builder.build().is_err());
+
+        let builder = ConfiguresCoreBuilder::new().local_folder("local_folder");
+        assert!(builder.build().is_err());
+
+        let builder = ConfiguresCoreBuilder::new()
+            .local_folder("local_folder")
+            .remote_url("remote_url");
+        assert!(builder.build().is_ok());
+        Ok(())
+    }
 
     #[test]
     /// create normal symlink
