@@ -5,12 +5,14 @@ pub mod file_operations;
 pub mod git;
 pub mod storage;
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct ConfiguresCore {
     remote_url: String,
     local_folder: String,
 }
 
+#[derive(Default)]
 pub struct ConfiguresCoreBuilder {
     remote_url: Option<String>,
     local_folder: Option<String>,
