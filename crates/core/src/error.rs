@@ -15,10 +15,15 @@ pub enum FileManipulationError {
 }
 
 #[derive(Debug, Clone)]
-pub struct GitError;
+pub enum GitError {
+    CloneFailed(String),
+}
 
 #[derive(Debug, Clone)]
-pub struct StorageError;
+pub enum StorageError {
+    NoLocalFolder,
+    CreationFailed(String),
+}
 
 #[derive(Debug, Clone)]
 pub enum BuilderError {
