@@ -1,18 +1,13 @@
-use std::fs;
-
-use directories::BaseDirs;
 use git2::Repository;
+use std::{fs, path::Path};
 
 use crate::error::{ConfiguresError, GitError, StorageError};
 
 /// tries to clone the repository at remote
-pub fn clone_remote(remote_url: impl Into<String>) -> Result<(), ConfiguresError> {
-    // should result in ~/.configures
-    let local_path = BaseDirs::new()
-        .ok_or(ConfiguresError::StorageError(StorageError::NoLocalFolder))?
-        .home_dir()
-        .join(".configures");
-
+pub fn clone_remote(
+    remote_url: impl Into<String>,
+    local_path: &Path,
+) -> Result<(), ConfiguresError> {
     // create if not exists
     if !local_path.exists() {
         fs::create_dir_all(&local_path).map_err(|err| {
