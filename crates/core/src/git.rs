@@ -10,7 +10,7 @@ pub fn clone_remote(
 ) -> Result<(), ConfiguresError> {
     // create if not exists
     if !local_path.exists() {
-        fs::create_dir_all(&local_path).map_err(|err| {
+        fs::create_dir_all(local_path).map_err(|err| {
             ConfiguresError::StorageError(StorageError::CreationFailed(err.to_string()))
         })?;
     }

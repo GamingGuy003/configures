@@ -25,7 +25,7 @@ pub struct ConfiguresCore {
 impl ConfiguresCore {
     /// initializes the git repo locally based off of remote
     pub fn init(&self) -> Result<(), ConfiguresError> {
-        clone_remote(self.remote_url.clone(), &Path::new(&self.local_path))
+        clone_remote(self.remote_url.clone(), Path::new(&self.local_path))
     }
 }
 
