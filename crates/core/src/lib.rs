@@ -7,6 +7,7 @@ use crate::{
     git::clone_remote,
 };
 
+pub mod config;
 pub mod error;
 pub mod file_operations;
 pub mod git;
