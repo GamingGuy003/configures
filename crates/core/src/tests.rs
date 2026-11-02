@@ -1,8 +1,28 @@
+use crate::config::ConfigBuilder;
+
 use super::*;
 use std::fs::{self, File};
 use std::io::{self, Write};
 use std::path::Path;
 use tempfile::tempdir;
+
+#[test]
+/// tries to build a config that is not okay
+fn test_config_builder_err() -> Result<(), ConfiguresError> {
+    let config_builder = ConfigBuilder::new();
+    assert!(!config_builder.build().is_ok());
+    Ok(())
+}
+
+#[test]
+/// tries to build a config that should be okay
+fn test_config_builder_ok() -> Result<(), ConfiguresError> {
+    let config_builder = ConfigBuilder::new().remote_url("remote_url");
+    let config = config_builder.build();
+    assert!(config.is_ok());
+    assert_eq!(config?.get_remote(), "remote_url".to_string());
+    Ok(())
+}
 
 #[test]
 /// tries to initialize the core by cloning a test repo

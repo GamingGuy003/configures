@@ -3,6 +3,7 @@ use std::path::Path;
 use directories::BaseDirs;
 
 use crate::{
+    config::Config,
     error::{BuilderError, ConfiguresError, StorageError},
     git::clone_remote,
 };
@@ -58,11 +59,30 @@ impl ConfiguresCoreBuilder {
                 BuilderError::MissingLocalFolder,
             ))?
             .to_string();
-        Ok(ConfiguresCore {
-            remote_url: self
-                .remote_url
-                .ok_or(ConfiguresError::BuilderError(BuilderError::MissingRemote))?,
-            local_path,
-        })
+
+        // determine config path
+        let config_path = BaseDirs::new()
+            .ok_or(ConfiguresError::StorageError(StorageError::NoLocalFolder))?
+            .config_dir()
+            .join(".configures")
+            .to_str()
+            .ok_or(ConfiguresError::BuilderError(
+                BuilderError::MissingLocalFolder,
+            ))?
+            .to_string();
+
+        // if remote url was already set we do not apply the value from config
+        if let Some(remote_url) = self.remote_url {
+            Ok(ConfiguresCore {
+                remote_url,
+                local_path,
+            })
+        } else {
+            let config = Config::load(config_path)?;
+            Ok(ConfiguresCore {
+                remote_url: config.get_remote(),
+                local_path,
+            })
+        }
     }
 }

@@ -15,4 +15,4 @@ directories = "6.0.0"
 git2 = { version = "0.21.0", features = ["https", "ssh"] }
 serde = "1.0.229"
 serde_derive = "1.0.229"
-serde_toml = "0.0.1"
+toml = "1.1.8"
